@@ -239,14 +239,14 @@ def demix_full(mix, device, chunk_size, models, infer_session, overlap=0.2, bigs
     if shift_number < 1:
         shift_number=1
 
-    mix_length = mix.shape[1] / 44100
+    mix_length = mix.shape[1] / 48000
     if shift_number > int(mix_length):
         shift_number = int(mix_length - 1)
     shifts = [x for x in range(shift_number)]
     results = []
     
     for shift in tqdm(shifts):
-        shift_samples = int(shift * 44100)
+        shift_samples = int(shift * 48000)
         # print(f"shift_samples = {shift_samples}")
         
         shifted_mix = np.concatenate((mix[:, -shift_samples:], mix[:, :-shift_samples]), axis=-1)
@@ -452,9 +452,9 @@ class EnsembleDemucsMDXMusicSeparationModel:
         sources3 = demix_full_mdx23c(mixed_sound_array.T, self.device)
         
         vocals3 = (match_array_shapes(sources3['Vocals'], mixed_sound_array.T) \
-                + lp_filter(14700, mixed_sound_array.T - match_array_shapes(sources3['Instrumental'], mixed_sound_array.T), 44100)) / 2
+                + lp_filter(14700, mixed_sound_array.T - match_array_shapes(sources3['Instrumental'], mixed_sound_array.T), 48000)) / 2
         
-        # sf.write("vocals3.wav", vocals3.T, 44100)
+        # sf.write("vocals3.wav", vocals3.T, 48000)
 
         print('Processing vocals with UVR-MDX-VOC-FT...')
         overlap = overlap_MDX
@@ -477,7 +477,7 @@ class EnsembleDemucsMDXMusicSeparationModel:
             bigshifts=options['bigshifts']
         )[0]
         vocals_mdxb1 = sources1 * 1.021
-        # sf.write("vocals_mdxb1.wav", vocals_mdxb1.T, 44100)
+        # sf.write("vocals_mdxb1.wav", vocals_mdxb1.T, 48000)
                
 
         print('Processing vocals with UVR-MDX-VOC-FT Fullband SRS...')
@@ -504,7 +504,7 @@ class EnsembleDemucsMDXMusicSeparationModel:
         vocals_SRS = match_array_shapes(sourcesSRS, mixed_sound_array.T)
         
         vocals_SRS = vocals_SRS * 1.021
-        # sf.write("vocals_SRS.wav", vocals_SRS.T, 44100)
+        # sf.write("vocals_SRS.wav", vocals_SRS.T, 48000)
 
         del self.infer_session1
         del self.mdx_models1
@@ -534,7 +534,7 @@ class EnsembleDemucsMDXMusicSeparationModel:
         instrum_mdxb2 = sources2
         vocals_mdxb2 = mixed_sound_array.T - (instrum_mdxb2 * 1.022)
         
-        #  sf.write("vocals_mdxb2.wav", vocals_mdxb2.T, 44100)
+        #  sf.write("vocals_mdxb2.wav", vocals_mdxb2.T, 48000)
         
         del self.infer_session2
         del self.mdx_models2
@@ -679,7 +679,7 @@ def predict_with_model(options):
 
     for i, input_audio in enumerate(options['input_audio']):
         print('Go for: {}'.format(input_audio))
-        audio, sr = librosa.load(input_audio, mono=False, sr=44100)
+        audio, sr = librosa.load(input_audio, mono=False, sr=48000)
         if len(audio.shape) == 1:
             audio = np.stack([audio, audio], axis=0)
         print("Input audio: {} Sample rate: {}".format(audio.shape, sr))
@@ -705,7 +705,7 @@ def predict_with_model(options):
 
 
 # Linkwitz-Riley filter
-def lr_filter(audio, cutoff, filter_type, order=6, sr=44100):
+def lr_filter(audio, cutoff, filter_type, order=6, sr=48000):
     audio = audio.T
     nyquist = 0.5 * sr
     normal_cutoff = cutoff / nyquist

@@ -127,7 +127,7 @@ class HTDemucs(nn.Module):
         # Weight init
         rescale=0.1,
         # Metadata
-        samplerate=44100,
+        samplerate=48000,
         segment=10,
         use_train_segment=True,
     ):
